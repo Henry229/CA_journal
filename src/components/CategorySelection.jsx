@@ -14,7 +14,7 @@ const CategorySelection = () => {
       <ul>
         {categories.map((cat, index) => (
           <li key={index}>
-            <Link to='/entry/new'>{cat}</Link>
+            <Link to={`/entry/new/${cat}`}>{cat}</Link>
           </li>
         ))}
       </ul>
