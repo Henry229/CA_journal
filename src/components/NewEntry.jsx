@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const NewEntry = ({ entries, setEntries }) => {
+const NewEntry = ({ setEntries, entries }) => {
   const { category } = useParams();
   const [entry, setEntry] = useState('');
+  const nav = useNavigate();
 
-  const submit = (event) => {
-    event.preventDefault();
+  function submit(evt) {
+    evt.preventDefault();
+    const id = entries.length;
+    // Add a new entry
     const newEntry = {
       category: category,
       content: entry,
     };
     setEntries([...entries, newEntry]);
-  };
+    nav(`/entry/${id}`);
+  }
 
   return (
     <>
@@ -21,7 +25,7 @@ const NewEntry = ({ entries, setEntries }) => {
         <div>
           <textarea
             value={entry}
-            onChange={(event) => setEntry(event.target.value)}
+            onChange={(evt) => setEntry(evt.target.value)}
             rows='10'
             className='form-control'
           ></textarea>
