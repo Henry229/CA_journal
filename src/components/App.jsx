@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import Navbar from './Navbar';
 import CategorySelection from './CategorySelection';
 import Home from './Home';
 import NewEntry from './NewEntry';
 import { Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import ShowEntry from './ShowEntry';
+import reducer from '../reducer';
+import JournalContext from '../context';
 
 // const seedEntries = [
 //   { category: "Food", content: "Pizza is awesome!" },
@@ -12,16 +14,28 @@ import ShowEntry from './ShowEntry';
 //   { category: "Coding", content: "React is cool!" },
 // ]
 
+const initialState = {
+  entries: [],
+  categories: [],
+};
+
 const App = () => {
-  const [entries, setEntries] = useState([]);
+  // const [entries, setEntries] = useState([]);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { entries, categories } = state;
+
   const nav = useNavigate();
-  const [categories, setCategories] = useState([]);
+  // const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     async function getCategories() {
       const res = await fetch('http://localhost:4001/categories');
       const data = await res.json();
-      setCategories(data);
+      // setCategories(data);
+      dispatch({
+        type: 'setCategories',
+        categories: data,
+      });
     }
     getCategories();
   }, []);
@@ -31,7 +45,8 @@ const App = () => {
     async function fetchEntries() {
       const res = await fetch('http://localhost:4001/entries');
       const data = await res.json();
-      setEntries(data);
+      // setEntries(data);
+      dispatch({ type: 'setEntries', entries: data });
     }
     fetchEntries();
   }, []);
@@ -65,19 +80,17 @@ const App = () => {
       body: JSON.stringify(newEntry),
     });
     const data = await returnedEntry.json();
-    setEntries([...entries, data]);
+    // setEntries([...entries, data]);
+    dispatch({ type: 'addEntry', newEntry: data });
     nav(`/entry/${id}`);
   };
 
   return (
-    <>
+    <JournalContext.Provider value={{ state, dispatch }}>
       <Navbar />
       <Routes>
-        <Route path='/' element={<Home entries={entries} />} />
-        <Route
-          path='/category'
-          element={<CategorySelection categories={categories} />}
-        />
+        <Route path='/' element={<Home />} />
+        <Route path='/category' element={<CategorySelection />} />
         <Route path='/entry/:id' element={<ShowEntryWrapper />} />
         <Route
           path='/entry/new/:category'
@@ -85,7 +98,7 @@ const App = () => {
         />
         <Route path='*' element={<h4>Page not found!</h4>} />
       </Routes>
-    </>
+    </JournalContext.Provider>
   );
 };
 
